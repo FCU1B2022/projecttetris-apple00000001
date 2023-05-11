@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
+
+#define CANVAS_WIDTH 10
+#define CANVAS_HEIGHT 20
 
 typedef enum {
 	RED = 41,
@@ -29,6 +35,22 @@ typedef struct {
 	char rotates[4][4][4];
 }Shape;
 
+typedef struct {
+	int x;
+	int y;
+	int score;
+	int rotate;
+	int fallTime;
+	ShapeId queue[4];
+}State;
+
+
+typedef struct {
+	Color color;
+	ShapeId shape;
+	bool current;
+}Block;
+
 Shape shape[7] = {
 	{
 		.shape = I,
@@ -58,7 +80,7 @@ Shape shape[7] = {
 				{0,1,0,0},
 				{0,1,0,0},
 				{0,1,0,0}
-			},
+			}
 		}
 	},
 	{
@@ -227,31 +249,36 @@ Shape shape[7] = {
 	},
 };
 
-typedef struct {
-	Color color;
-	ShapeId shape;
-}Block;
+
+void resetBlock(Block* block)
+{
+	block->color = BLACK;
+	block->shape = EMPTY;
+	block->current = false;
+}
 
 int main() {
-	Color cur;
+	srand(time(NULL));
+	State state = {
+		.x = CANVAS_WIDTH / 2,
+		.y = 0,
+		.score = 0,
+		.rotate = 0,
+		.fallTime = 0
+	};
 
-	for (int i = 0; i < 7; i++) {
-		for (int r = 0; r < 4; r++) {
-			for (int s = 0; s < shape[i].size; s++) {
-				for (int t = 0; t < shape[i].size; t++) {
-					if (shape[i].rotates[r][s][t]) {
-						cur = shape[i].color;
-					}
-					else {
-						cur = WHITE;
-					}
-					printf("\033[%dm \033[0m", cur);
-				}
-				printf("\n");
-			}
-			printf("\n");
-		}
-		printf("\n");
+	for (int i = 0; i < 4; i++) {
+		state.queue[i] = rand() % 7; //0~7的數
 	}
-	return 0;
+
+	Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH];
+
+	for (int i = 0; i < CANVAS_HEIGHT; i++) {
+		for (int j = 0; j < CANVAS_WIDTH; j++) {
+			resetBlock(&canvas[i][j]);
+		}
+	}
+
+	system("cls"); //畫面清空
+	printf("\e[?25l"); //隱藏游標
 }
